@@ -55,52 +55,28 @@ char* rsa_encrypt(const char *message, const unsigned long message_size, const s
     if (message_size % 4) {
         no_of_chunks = (message_size / 4) + 1;  //Chunks of four, plus the remainder
     } else {
-        no_of_chunks = (message_size / 4);
+        no_of_chunks = message_size / 4;
     }
+    //printf("Chunks: %d\n", no_of_chunks);
     
     unsigned char* encrypted = malloc(no_of_chunks * sizeof(char) * 4);
     if(encrypted == NULL){
         fprintf(stderr, "Error: Heap allocation failed.\n");
         return NULL;
     }
-    for(int i = 0; i < message_size; i += 4){
-        // char firstChar = message[i];
-        // char secondChar = i+1 < message_size ? message[i+1] : '\0';
-        // char thirdChar = i+2 < message_size ? message[i+2] : '\0';
-        // char fourthChar = i+3 < message_size ? message[i+3] : '\0';
-        // printf("%c, %c, %c, %c\n", firstChar, secondChar, thirdChar, fourthChar);
-        
-        // int valueToEncrypt = (int) fourthChar + 255 * (int)thirdChar + 255*255 * (int)secondChar + 255*255*255 * (int)firstChar;
-        int valueToEncrypt = *((int *) message + i); //Cast to a pointer and dereference
+    for(int i = 0; i < no_of_chunks; i++) {
+        int valueToEncrypt = *((int *) (message + i*4)); //Cast to a pointer and dereference
                 //https://stackoverflow.com/questions/9165352/get-int-from-char-of-bytes
 
-        printf("Value: %d\n", valueToEncrypt);
+        //printf("Value: %d\n", valueToEncrypt);
         unsigned int encryptedValue = rsa_modExp(valueToEncrypt, pub->exponent, pub->modulus);
         printf("Raw val (enc): %d\n", encryptedValue);
-        //printf("Value: %d\n", encryptedValue);
-        // if (encryptedValue > MAX_THREE_BYTE_VALUE) {
-        //     fprintf(stderr, "Error: Too big value to encrypt, %d\n", encryptedValue);
-        //     return NULL;
-        // }
-        //int index = i / 4;
-        //encrypted[index] = encryptedValue;
-        //After encryption
-        encrypted[i] = (encryptedValue >> 24) & 0xFF;
-        encrypted[i+1] = (encryptedValue >> 16) & 0xFF;
-        encrypted[i+2] = (encryptedValue >> 8) & 0xFF;
-        encrypted[i+3] = encryptedValue & 0xFF;
 
-        //sprintf(encrypted + i,"%d", encryptedValue);    //BROKEN! Write this in binary
-        printf("Written: %xd\n", *((int *) encrypted + i));
-        int firstChar = encryptedValue/(255*255*255);
-        int secondChar = (encryptedValue / (255*255)) % 255;
-        int thirdChar = (encryptedValue / 255) % 255;
-        int fourthChar = encryptedValue % 255;
-        printf("Chars: %d, %d, %d, %d\n", (int)firstChar, (int)secondChar, (int)thirdChar, (int)fourthChar);
-        // encrypted[i] = firstChar;
-        // encrypted[i+1] = secondChar;
-        // encrypted[i+2] = thirdChar;
-        // encrypted[i+3] = fourthChar;
+        encrypted[i*4 + 3] = (encryptedValue >> 24) & 0xFF;
+        encrypted[i*4 + 2] = (encryptedValue >> 16) & 0xFF;
+        encrypted[i*4 + 1] = (encryptedValue >> 8) & 0xFF;
+        encrypted[i*4] = encryptedValue & 0xFF;
+        //printf("Written: %d\n", *((int *) encrypted + i*4));
     }
     return encrypted;
 }
@@ -123,14 +99,8 @@ char* rsa_decrypt(const char* message,
     }
     // Now we go through each 4-byte chunk and decrypt it.
     for(int i = 0; i < message_size; i += 4){
-        char firstChar = message[i];
-        char secondChar = message[i+1];
-        char thirdChar = message[i+2];
-        char fourthChar = message[i+3];
-        printf("Chars: %d, %d, %d, %d\n", (int)firstChar, (int)secondChar, (int)thirdChar, (int)fourthChar);
         
-        int valueToDecrypt = *((int *) message + i);
-        // int valueToDecrypt = (int) fourthChar + 255 * (int)thirdChar + 255*255 * (int)secondChar + 255*255*255 * (int)firstChar;
+        int valueToDecrypt = *((int *) (message + i));
         printf("Raw val (decr): %d\n", valueToDecrypt);
         int decryptedValue = rsa_modExp(valueToDecrypt, priv->exponent, priv->modulus);
         printf("Value: %d\n", decryptedValue);
@@ -139,16 +109,10 @@ char* rsa_decrypt(const char* message,
         //     return NULL;
         // }
         //After encryption
-        sprintf(decrypted + i,"%d", decryptedValue);
-        // firstChar = decryptedValue/(255*255*255);
-        // secondChar = (decryptedValue / (255*255)) % 255;
-        // thirdChar = (decryptedValue / 255) % 255;
-        // fourthChar = decryptedValue % 255;
-        // printf("%c, %c, %c, %c\n", firstChar, secondChar, thirdChar, fourthChar);
-        // decrypted[i] = firstChar;
-        // decrypted[i+1] = secondChar;
-        // decrypted[i+2] = thirdChar;
-        // decrypted[i+3] = fourthChar;
+        decrypted[i+3] = (decryptedValue >> 24) & 0xFF;
+        decrypted[i+2] = (decryptedValue >> 16) & 0xFF;
+        decrypted[i+1] = (decryptedValue >> 8) & 0xFF;
+        decrypted[i] = decryptedValue & 0xFF;
     }
     return decrypted;
 }
