@@ -8,6 +8,7 @@ int main(int argc, char **argv)
   struct public_key_class pub[1];
   struct private_key_class priv[1];
   
+  // Example keys that work
   priv->modulus = 2239219757;
   priv->exponent = 1590384365;
 
@@ -25,7 +26,7 @@ int main(int argc, char **argv)
     printf("%c\n", message[i]);
   }  
   
-  char* encrypted = rsa_encrypt(message, 8, pub);
+  char* encrypted = rsa_encrypt(message, strlen(message), pub);
   if (!encrypted){
     fprintf(stderr, "Error in encryption!\n");
     return 1;
@@ -37,13 +38,13 @@ int main(int argc, char **argv)
   
 
 
-  char *decrypted = rsa_decrypt(encrypted, 8, priv);
+  char *decrypted = rsa_decrypt(encrypted, strlen(encrypted), priv);
   if (!decrypted){
     fprintf(stderr, "Error in decryption!\n");
     return 1;
   }
   printf("Decrypted:\n");
-  for(i=0; i < strlen(message); i++){
+  for(i=0; i < strlen(decrypted); i++){
     printf("%c\n", decrypted[i]);
   }
   
