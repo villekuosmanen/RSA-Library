@@ -7,7 +7,7 @@ Originally created by Andrew Kiluk
 
 Edited for the microbit protocol (supergroup C) by Ville Kuosmanen
 
-MIT licence. Note that permission to use this is NOT YET given by Chris.
+MIT licence.
 
 Sources used:
 https://stackoverflow.com/questions/3784263/converting-an-int-into-a-4-byte-char-array-c
