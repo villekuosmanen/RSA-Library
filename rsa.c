@@ -42,8 +42,7 @@ long long rsa_modExp(unsigned long long b, unsigned long long e, unsigned long l
   if(e == 1) return b;
   if( e % 2 == 0){
     return ( rsa_modExp(b * b % m, e/2, m) % m );
-  }
-  if( e % 2 == 1){
+  } else {
     return ( b * rsa_modExp(b, (e-1), m) % m );
   }
 
@@ -58,7 +57,7 @@ char* rsa_encrypt(const char *message, const unsigned long message_size, const s
     }
     //printf("Chunks: %d\n", no_of_chunks);
     
-    unsigned char* encrypted = malloc(no_of_chunks * sizeof(char) * 4); //Encrypted output is wider, chunks of four
+    char* encrypted = (char*) malloc(no_of_chunks * sizeof(char) * 4); //Encrypted output is wider, chunks of four
     if(encrypted == NULL){
         fprintf(stderr, "Error: Heap allocation failed.\n");
         return NULL;
@@ -94,7 +93,7 @@ char* rsa_decrypt(const char* message,
     int no_of_chunks = message_size / 4;
     // We allocate space to do the decryption (temp) and space for the output as a char array
     // (decrypted)
-    unsigned char *decrypted = malloc(no_of_chunks * 3);
+    char *decrypted = (char*) malloc(no_of_chunks * 3);
     if(decrypted == NULL) {
         fprintf(stderr, "Error: Heap allocation failed.\n");
         return NULL;

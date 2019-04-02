@@ -7,7 +7,7 @@ int main(int argc, char **argv)
 {
   struct public_key_class pub[1];
   struct private_key_class priv[1];
-  
+
   // Example keys that work
   priv->modulus = 2239219757;
   priv->exponent = 1590384365;
