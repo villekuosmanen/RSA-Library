@@ -52,6 +52,9 @@ char* rsa_encrypt(const char *message, const unsigned long message_size, const s
     int no_of_chunks;
     if (message_size % 3) {
         no_of_chunks = (message_size / 3) + 1;  //Chunks of three, plus the remainder
+        char* temp = (char*) calloc(no_of_chunks * 3, 1);
+        memcpy(temp, message, message_size);
+        message = temp;
     } else {
         no_of_chunks = message_size / 3;
     }
@@ -63,10 +66,10 @@ char* rsa_encrypt(const char *message, const unsigned long message_size, const s
         return NULL;
     }
     for(int i = 0; i < no_of_chunks; i++) {
-        unsigned int valueToEncrypt = *((int *) (message + i*3)); //Cast to a pointer and dereference
-                // https://stackoverflow.com/questions/9165352/get-int-from-char-of-bytes
+        unsigned int valueToEncrypt = ((unsigned char*)message)[i*3] + (((unsigned char*)message)[i*3 + 1] << 8) + (((unsigned char*)message)[i*3 + 2] << 16);
+                // https://stackoverflow.com/questions/9896589/how-do-you-read-in-a-3-byte-size-value-as-an-integer-in-c
 
-        //printf("Value: %d\n", valueToEncrypt);
+        //printf("Value: %ud\n", valueToEncrypt);
         unsigned int encryptedValue = rsa_modExp(valueToEncrypt, pub->exponent, pub->modulus);
         //printf("Raw val (enc): %d\n", encryptedValue);
 
@@ -104,6 +107,7 @@ char* rsa_decrypt(const char* message,
         unsigned int valueToDecrypt = *((int *) (message + i*4));
         //printf("Raw val (decr): %d\n", valueToDecrypt);
         unsigned int decryptedValue = rsa_modExp(valueToDecrypt, priv->exponent, priv->modulus);
+        //printf("Value (decr): %d\n", decryptedValue);
 
         //After encryption
         decrypted[i*3 + 2] = (decryptedValue >> 16) & 0xFF;
